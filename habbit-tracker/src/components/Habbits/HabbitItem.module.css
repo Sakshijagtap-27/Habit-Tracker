@@ -1,0 +1,35 @@
+.habbit {
+	display: flex;
+	margin-bottom: 0.5rem;
+}
+.habbits-header {
+	padding: 1rem 0rem;
+	border-bottom: 1px solid;
+	position: sticky;
+	top: 0;
+	left: 0;
+	width: 100%;
+	background-color: #adc2a9;
+}
+.habbit-values {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(20px, 1fr));
+	justify-items: center;
+	align-items: center;
+	column-gap: 2px;
+	width: 90%;
+}
+.habbit-label {
+	width: 10%;
+	user-select: none;
+}
+.habbit-label-removable {
+	cursor: pointer;
+	text-decoration: line-through;
+	text-decoration-color: transparent;
+	transition: text-decoration-color 0.3s ease-in;
+}
+.habbit-label-removable:hover {
+	text-decoration: line-through;
+	text-decoration-color: #c85c5c;
+}
