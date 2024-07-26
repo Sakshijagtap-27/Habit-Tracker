@@ -23,7 +23,7 @@ const HabbitForm = ({ onNewHabbitCreated, numOfHabbits }) => {
 	return (
 		<>
 			{maxNumberOfHabbitsReached ? (
-				<p>Good job! Max number of habbits reached :D</p>
+				<p>Good job! Max number of habits reached :D</p>
 			) : (
 				<div className={`${styles["form-group"]}`}>
 					<input
@@ -41,7 +41,7 @@ const HabbitForm = ({ onNewHabbitCreated, numOfHabbits }) => {
 					/>
 
 					<label htmlFor="habbit" className={styles["form-label"]}>
-						New habbit
+						New habit
 					</label>
 				</div>
 			)}
