@@ -5,7 +5,7 @@ const Header = () => {
 		<div className={styles.header}>
 			<h1>Habit tracker</h1>
 			<p>Keep your habits on track!</p>
-			<button>LOGIN</button>
+			
 		</div>
 	);
 };
