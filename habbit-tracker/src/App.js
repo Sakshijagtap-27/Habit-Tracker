@@ -1,7 +1,7 @@
 import moment from "moment";
 
 import { useState } from "react";
-
+import ReactGA from "react-ga4"; 
 import useHabbitContext from "./hooks/use-habbit-context";
 
 import Header from "./components/UI/Header";
@@ -15,7 +15,10 @@ const App = () => {
 	const monthId = `${dateFilter.month() + 1}_${dateFilter.year()}`;
 	const filterTitle = dateFilter.format("MMMM yyyy.");
 	const numOfDaysInMonth = dateFilter.daysInMonth();
-
+	useEffect(() => {
+		// Track a page view whenever the dateFilter (month) changes
+		ReactGA.send({ hitType: "pageview", page: `/month/${monthId}` });
+	  }, [monthId]); // Dependency array: whenever monthId changes, a new page view is sent
 	const changeMonthHandler = (value) => {
 		const newDate =
 			value > 0
