@@ -1,59 +1,71 @@
 import moment from "moment";
-
-import { useState, useEffect } from "react";
-import ReactGA from "react-ga4"; 
-import useHabbitContext from "./hooks/use-habbit-context";
+import { useState, useEffect, useContext } from "react";
+import ReactGA from "react-ga4";
 
 import Header from "./components/UI/Header";
 import MonthFilter from "./components/Filter/MonthFilter";
 import Habbits from "./components/Habbits/Habbits";
+import HabitPieChart from './components/Charts/HabitPieChart';
+import { analyzeHabitData, getPieChartData } from './store/data-analysis-helper';
+import habbitContext from './store/habbit-context'; 
+
 
 const App = () => {
-	const habbitCtx = useHabbitContext();
-	const [dateFilter, setDateFilter] = useState(moment());
+    // Access context without destructuring into 'state'
+    const habbitCtx = useContext(habbitContext);
+    const { habbits, months } = habbitCtx; // Direct access to habbits and months
+    const [dateFilter, setDateFilter] = useState(moment());
+    const [habitData, setHabitData] = useState([]); // Pie chart data
 
-	const monthId = `${dateFilter.month() + 1}_${dateFilter.year()}`;
-	const filterTitle = dateFilter.format("MMMM yyyy.");
-	const numOfDaysInMonth = dateFilter.daysInMonth();
-	useEffect(() => {
-		// Track a page view whenever the dateFilter (month) changes
-		ReactGA.send({ hitType: "pageview", page: `/month/${monthId}` });
-	  }, [monthId]); // Dependency array: whenever monthId changes, a new page view is sent
-	const changeMonthHandler = (value) => {
-		const newDate =
-			value > 0
-				? moment(dateFilter).add(value, "months")
-				: moment(dateFilter).subtract(Math.abs(value), "months");
-		const selectedMonth = habbitCtx.months.find(
-			(month) => month.id === `${newDate.month() + 1}_${newDate.year()}`
-		);
-		if (!selectedMonth) {
-			habbitCtx.addMonth({
-				id: `${newDate.month() + 1}_${newDate.year()}`,
-				days: [...Array(newDate.daysInMonth()).keys()].map((_key) => {
-					return [];
-				}),
-			});
-		}
-		setDateFilter((currentDateFilter) => {
-			const newDate =
-				value > 0
-					? moment(currentDateFilter).add(value, "months")
-					: moment(currentDateFilter).subtract(Math.abs(value), "months");
-			return newDate;
-		});
-	};
+    const monthId = `${dateFilter.month() + 1}_${dateFilter.year()}`;
+    const filterTitle = dateFilter.format("MMMM yyyy.");
+    const numOfDaysInMonth = dateFilter.daysInMonth();
 
-	return (
-		<>
-			<Header></Header>
-			<MonthFilter
-				title={filterTitle}
-				onMonthChanged={changeMonthHandler}
-			></MonthFilter>
-			<Habbits monthId={monthId} numOfDays={numOfDaysInMonth}></Habbits>
-		</>
-	);
+    useEffect(() => {
+        ReactGA.send({ hitType: "pageview", page: `/month/${monthId}` });
+    }, [monthId]);
+
+    const changeMonthHandler = (value) => {
+        const newDate =
+            value > 0
+                ? moment(dateFilter).add(value, "months")
+                : moment(dateFilter).subtract(Math.abs(value), "months");
+        const selectedMonth = habbitCtx.months.find(
+            (month) => month.id === `${newDate.month() + 1}_${newDate.year()}`
+        );
+        if (!selectedMonth) {
+            habbitCtx.addMonth({
+                id: `${newDate.month() + 1}_${newDate.year()}`,
+                days: [...Array(newDate.daysInMonth()).keys()].map(() => []),
+            });
+        }
+        setDateFilter(newDate);
+    };
+
+    // Analyze habit data and generate pie chart data
+    useEffect(() => {
+        if (habbits && months) {
+            const habitCheckCount = analyzeHabitData({ habbits, months });
+            const pieChartData = getPieChartData(habitCheckCount, habbits);
+            setHabitData(pieChartData); // Set pie chart data
+        }
+    }, [habbits, months]);
+
+    return (
+        <>
+            <Header />
+            <MonthFilter title={filterTitle} onMonthChanged={changeMonthHandler} />
+            <Habbits monthId={monthId} numOfDays={numOfDaysInMonth} />
+
+            {/* Render the pie chart if habit data is available */}
+            {habitData.length > 0 && (
+                <div>
+                    <h2 className="habit-chart-headline">Habit Completion Chart</h2>
+                    <HabitPieChart habitData={habitData} />
+                </div>
+            )}
+        </>
+    );
 };
 
 export default App;
